@@ -1,0 +1,473 @@
+<div class="bill-page">
+  <header class="page-header">
+    <button class="back-button" routerLink="/home" type="button">
+      ← Back / वापस जाएं
+    </button>
+
+    <div class="page-title">
+      <span class="page-icon">🧺</span>
+      <div>
+        <h1>Create New Bill</h1>
+        <p>नया बिल बनाएं और ग्राहक की जानकारी भरें</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="bill-paper">
+    <!-- BILL DETAILS -->
+    <section class="bill-section">
+      <div class="section-heading">
+        <span class="section-number">1</span>
+        <div>
+          <h2>Bill Details / बिल की जानकारी</h2>
+          <p>दुकान की रसीद और डिलीवरी की तारीख भरें</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="physicalBillNumber">
+            Physical Bill Number / बिल नंबर
+          </label>
+          <input
+            id="physicalBillNumber"
+            type="text"
+            [(ngModel)]="physicalBillNumber"
+            name="physicalBillNumber"
+            placeholder="जैसे: 014"
+          />
+          <small>कागज वाली रसीद पर लिखा बिल नंबर डालें</small>
+        </div>
+
+        <div class="form-group">
+          <label for="expectedDeliveryDate">
+            Expected Delivery Date / कपड़े देने की तारीख
+          </label>
+          <input
+            id="expectedDeliveryDate"
+            type="date"
+            [(ngModel)]="expectedDeliveryDate"
+            name="expectedDeliveryDate"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOMER DETAILS -->
+    <section class="bill-section">
+      <div class="section-heading">
+        <span class="section-number">2</span>
+        <div>
+          <h2>Customer Details / ग्राहक की जानकारी</h2>
+          <p>मोबाइल नंबर डालकर पुराने ग्राहक को खोजें</p>
+        </div>
+      </div>
+
+      <div class="form-group phone-group">
+        <label for="customerPhone"> Mobile Number / मोबाइल नंबर </label>
+
+        <input
+          id="customerPhone"
+          type="tel"
+          [(ngModel)]="customerPhone"
+          name="customerPhone"
+          (input)="onPhoneInput()"
+          maxlength="10"
+          inputmode="numeric"
+          placeholder="10 अंकों का मोबाइल नंबर डालें"
+        />
+
+        @if (isSearchingCustomers) {
+          <small class="search-message">
+            ग्राहक खोज रहे हैं... / Searching customers...
+          </small>
+        }
+
+        @if (customerSearchError) {
+          <small class="error-text">
+            {{ customerSearchError }}
+          </small>
+        }
+
+        <!-- CUSTOMER SUGGESTIONS -->
+        @if (showSuggestions) {
+          <div class="suggestion-box">
+            @for (customer of filteredCustomers; track customer.id) {
+              <div
+                class="suggestion-item"
+                (mousedown)="selectCustomer(customer)"
+              >
+                <strong>{{ customer.name }}</strong>
+                <span>📞 {{ customer.phone }}</span>
+                <small>
+                  {{ customer.address || "पता उपलब्ध नहीं है" }}
+                </small>
+                <small>Customer ID: {{ customer.id }}</small>
+              </div>
+            }
+
+            @if (filteredCustomers.length === 0 && !isSearchingCustomers) {
+              <div class="no-customer">कोई पुराना ग्राहक नहीं मिला।</div>
+            }
+
+            <div class="create-new-option" (mousedown)="createNewCustomer()">
+              + Create New Customer / नया ग्राहक बनाएं
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (isExistingCustomerSelected) {
+        <div class="customer-message existing-message">
+          <span>✓</span>
+          पुराना ग्राहक चुना गया है। नाम और पता बदल सकते हैं।
+        </div>
+      }
+
+      @if (createNewCustomerAnyway) {
+        <div class="customer-message new-customer-message">
+          नया ग्राहक चुना गया है। कृपया नीचे उसकी जानकारी भरें।
+        </div>
+      }
+
+      @if (isExistingCustomerSelected) {
+        <div class="form-group customer-id-group">
+          <label>Customer ID / ग्राहक आईडी</label>
+          <input
+            type="text"
+            [value]="selectedCustomerId"
+            readonly
+            class="readonly-input"
+          />
+        </div>
+      }
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="customerName"> Customer Name / ग्राहक का नाम </label>
+          <input
+            id="customerName"
+            type="text"
+            [(ngModel)]="customerName"
+            name="customerName"
+            placeholder="ग्राहक का नाम लिखें"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="customerAddress"> Address / ग्राहक का पता </label>
+          <input
+            id="customerAddress"
+            type="text"
+            [(ngModel)]="customerAddress"
+            name="customerAddress"
+            placeholder="पूरा पता लिखें"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="bill-section">
+      <div class="section-heading">
+        <span class="section-number">3</span>
+        <div>
+          <h2>Clothes Details / कपड़ों की जानकारी</h2>
+          <p>हर तरह के कपड़े की संख्या और उसकी राशि भरें</p>
+        </div>
+      </div>
+
+      <div class="product-list">
+        @for (row of productRows; track row.id; let i = $index) {
+          <div class="product-card">
+            <div class="product-card-header">
+              <div class="product-number">
+                <span>{{ i + 1 }}</span>
+                <strong>Clothing Item / कपड़े का विवरण</strong>
+              </div>
+
+              @if (productRows.length > 1) {
+                <button
+                  type="button"
+                  class="remove-button"
+                  (click)="removeProductRow(row.id)"
+                  title="Remove product"
+                >
+                  ✕ <span>हटाएं</span>
+                </button>
+              }
+            </div>
+
+            <div class="product-fields">
+              <div class="form-group">
+                <label [for]="'category' + row.id">
+                  Category / काम का प्रकार
+                </label>
+
+                <select
+                  [id]="'category' + row.id"
+                  [(ngModel)]="row.category"
+                  [name]="'category' + row.id"
+                  (ngModelChange)="onCategoryChange(row)"
+                >
+                  <option value="">चुनें / Select</option>
+
+                  @for (category of categories; track category) {
+                    <option [value]="category">
+                      {{ category }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label [for]="'product' + row.id">
+                  Product / कपड़े का नाम
+                </label>
+
+                <select
+                  [id]="'product' + row.id"
+                  [(ngModel)]="row.product"
+                  [name]="'product' + row.id"
+                  [disabled]="!row.category"
+                >
+                  <option value="">कपड़ा चुनें</option>
+
+                  @for (product of getAvailableProducts(row); track product) {
+                    <option [value]="product">
+                      {{ product }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label [for]="'quantity' + row.id">
+                  Quantity / कितने कपड़े?
+                </label>
+
+                <input
+                  [id]="'quantity' + row.id"
+                  type="number"
+                  min="1"
+                  inputmode="numeric"
+                  [(ngModel)]="row.quantity"
+                  [name]="'quantity' + row.id"
+                  placeholder="जैसे: 2"
+                />
+              </div>
+
+              <div class="form-group">
+                <label [for]="'amount' + row.id">
+                  Amount / इस प्रकार के कपड़ों की राशि (₹)
+                </label>
+
+                <input
+                  [id]="'amount' + row.id"
+                  type="number"
+                  min="0"
+                  inputmode="decimal"
+                  [(ngModel)]="row.amount"
+                  [name]="'amount' + row.id"
+                  (ngModelChange)="calculateTotal()"
+                  placeholder="जैसे: 100"
+                />
+                <small>इस पूरी लाइन की कुल राशि भरें</small>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="add-product-button"
+        (click)="addProductRow()"
+      >
+        <span>+</span>
+        Add Another Product / एक और कपड़ा जोड़ें
+      </button>
+    </section>
+
+    <!-- TOTAL -->
+    <section class="total-section">
+      <div>
+        <h2>Total Amount / कुल राशि</h2>
+        <p>ग्राहक से ली जाने वाली कुल राशि भरें</p>
+      </div>
+
+      <div class="total-input-wrapper">
+        <span>₹</span>
+        <input
+          type="number"
+          min="0"
+          inputmode="decimal"
+          [(ngModel)]="totalAmount"
+          name="totalAmount"
+          placeholder="0"
+        />
+      </div>
+    </section>
+
+    <!-- VALIDATION -->
+    @if (validationMessage) {
+      <div class="validation-message">
+        <span>⚠</span>
+        {{ validationMessage }}
+      </div>
+    }
+
+    <!-- SAVE -->
+    <div class="save-bill-container">
+      <button
+        type="button"
+        class="save-bill-button"
+        (click)="saveBill()"
+        [disabled]="isSavingBill"
+      >
+        @if (isSavingBill) {
+          Saving Bill... / बिल सेव हो रहा है...
+        } @else {
+          ✓ Save Bill / बिल सेव करें
+        }
+      </button>
+    </div>
+
+    <footer class="bill-footer">
+      <strong>Thank you! Visit Again.</strong>
+      <span>धन्यवाद! फिर से पधारें।</span>
+    </footer>
+  </main>
+
+  <!-- BILL SUCCESS POPUP -->
+  @if (showBillSuccessPopup && savedBill) {
+    <div class="success-modal-overlay">
+      <div class="success-modal">
+        <div class="success-modal-header">
+          <div class="success-icon">✓</div>
+          <h2>Bill Saved Successfully!</h2>
+          <p>बिल सफलतापूर्वक सेव हो गया!</p>
+        </div>
+
+        <div class="saved-bill-number">
+          <span>Bill Number / बिल नंबर</span>
+          <strong>{{ savedBill.billNumber }}</strong>
+        </div>
+
+        <section class="popup-section">
+          <h3>Customer Details / ग्राहक की जानकारी</h3>
+
+          @if (savedBill.customer) {
+            <div class="popup-details-grid">
+              <div>
+                <span>Customer Name / ग्राहक का नाम</span>
+                <strong>{{ savedBill.customer.name }}</strong>
+              </div>
+
+              <div>
+                <span>Mobile Number / मोबाइल नंबर</span>
+                <strong>{{ savedBill.customer.phone }}</strong>
+              </div>
+
+              <div>
+                <span>Customer ID / ग्राहक आईडी</span>
+                <strong>{{ savedBill.customer.id }}</strong>
+              </div>
+
+              <div>
+                <span>Address / पता</span>
+                <strong>
+                  {{ savedBill.customer.address || "Not provided" }}
+                </strong>
+              </div>
+            </div>
+          } @else {
+            <p class="error-text">
+              Customer details were not returned by the server.
+            </p>
+          }
+        </section>
+
+        <section class="popup-section">
+          <h3>Delivery Details / डिलीवरी की जानकारी</h3>
+
+          <div class="popup-details-grid">
+            <div>
+              <span>Expected Delivery Date / डिलीवरी तारीख</span>
+              <strong>{{ savedBill.expectedDeliveryDate }}</strong>
+            </div>
+
+            <div>
+              <span>Bill Status / बिल की स्थिति</span>
+              <strong>{{ savedBill.processStatus }}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="popup-section">
+          <h3>Products / कपड़ों की जानकारी</h3>
+
+          <div class="popup-product-list">
+            @for (product of savedBill.products; track product.id) {
+              <div class="popup-product-item">
+                <div>
+                  <strong>{{ product.productType }}</strong>
+                  <small>{{ product.category }}</small>
+                </div>
+                <span>{{ product.quantity }} नग</span>
+                <strong>₹{{ product.amount }}</strong>
+              </div>
+            }
+          </div>
+        </section>
+
+        <div class="popup-total">
+          <span>Total Amount / कुल राशि</span>
+          <strong>₹{{ savedBill.totalAmount }}</strong>
+        </div>
+
+        <button
+          type="button"
+          class="popup-close-button"
+          (click)="closeBillSuccessPopup()"
+        >
+          Close / बंद करें
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- BILL FAILURE POPUP -->
+  @if (showBillFailurePopup) {
+    <div class="failure-modal-overlay">
+      <div class="failure-modal">
+        <div class="failure-modal-header">
+          <div class="failure-icon">✕</div>
+          <h2>Bill Could Not Be Saved!</h2>
+          <p>बिल सेव नहीं हो पाया!</p>
+        </div>
+
+        <div class="failure-message-box">
+          <h3>Reason / कारण</h3>
+          <p>{{ billFailureMessage }}</p>
+        </div>
+
+        <div class="failure-instruction">
+          <strong>What should you do? / क्या करें?</strong>
+          <p>
+            कृपया भरी गई जानकारी जांचें और दोबारा कोशिश करें। यदि बिल नंबर पहले
+            से मौजूद है, तो दूसरा बिल नंबर डालें।
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="failure-close-button"
+          (click)="closeBillFailurePopup()"
+        >
+          Close / बंद करें
+        </button>
+      </div>
+    </div>
+  }
+</div>

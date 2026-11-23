@@ -1,0 +1,59 @@
+<div class="home-container">
+  <header class="header">
+    <div class="logo">🧺</div>
+
+    <h1>Laundry Management</h1>
+
+    <p class="hindi-title">धुलाई बिल प्रबंधन</p>
+
+    <p class="subtitle">आपकी दुकान का आसान हिसाब</p>
+  </header>
+
+  <main class="main-content">
+    <!-- Create New Bill -->
+    <button
+      class="action-card new-bill"
+      routerLink="/create-bill"
+      type="button"
+    >
+      <span class="card-icon">📄</span>
+      <span class="card-title">Create New Bill</span>
+      <span class="card-hindi">नया बिल बनाएं</span>
+      <span class="card-description"> नए ग्राहक का ऑर्डर दर्ज करें </span>
+    </button>
+
+    <!-- Process -->
+    <button class="action-card process" routerLink="/process" type="button">
+      <span class="card-icon">📦</span>
+      <span class="card-title">Process</span>
+      <span class="card-hindi">कपड़ों की स्थिति बदलें</span>
+      <span class="card-description"> QR स्कैन करें या बिल नंबर डालें </span>
+    </button>
+
+    <!-- Upcoming Deliveries -->
+    <button
+      class="action-card upcoming"
+      routerLink="/upcoming-deliveries"
+      type="button"
+    >
+      <span class="card-icon">📅</span>
+      <span class="card-title">Upcoming Deliveries</span>
+      <span class="card-hindi">आगामी डिलीवरी</span>
+      <span class="card-description"> बाकी और तैयार ऑर्डर देखें </span>
+    </button>
+
+    <!-- Find Old Bill -->
+    <button
+      class="action-card find-bill"
+      routerLink="/search-bill"
+      type="button"
+    >
+      <span class="card-icon">🔍</span>
+      <span class="card-title">Find Old Bill</span>
+      <span class="card-hindi">पुराना बिल खोजें</span>
+      <span class="card-description"> पुराने ऑर्डर की जानकारी देखें </span>
+    </button>
+  </main>
+
+  <footer>Simple • Fast • Easy to Use</footer>
+</div>

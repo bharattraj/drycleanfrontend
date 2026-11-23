@@ -1,0 +1,336 @@
+<div class="page-container">
+  <!-- Page header -->
+  <header class="page-header">
+    <a routerLink="/home" class="back-button" aria-label="होम पेज पर जाएं">
+      ←
+    </a>
+
+    <div class="header-text">
+      <h1>Upcoming Deliveries</h1>
+      <p>आगामी डिलीवरी / बाकी बिल प्रबंधन</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      (click)="loadPendingBills()"
+      [disabled]="isLoading"
+      aria-label="Refresh bills"
+    >
+      ↻
+    </button>
+  </header>
+
+  <main class="content">
+    <!-- Summary cards -->
+    <section class="summary-grid">
+      <div class="summary-card overdue-summary">
+        <span class="summary-icon">!</span>
+        <div>
+          <span class="summary-label">OVERDUE</span>
+          <strong>{{ overdueCount }}</strong>
+          <small>देरी हो चुकी है</small>
+        </div>
+      </div>
+
+      <div class="summary-card today-summary">
+        <span class="summary-icon">✓</span>
+        <div>
+          <span class="summary-label">DUE TODAY</span>
+          <strong>{{ todayCount }}</strong>
+          <small>आज की डिलीवरी</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard views -->
+    <section class="filter-card">
+      <h2>बिल कैसे देखना चाहते हैं?</h2>
+      <p class="section-subtitle">Choose how you want to view bills</p>
+
+      <div class="view-grid">
+        <button
+          type="button"
+          class="view-button"
+          [class.active]="activeView === 'today'"
+          (click)="setView('today')"
+        >
+          <span class="view-icon">📅</span>
+          <strong>Today's Deliveries</strong>
+          <small>आज की डिलीवरी</small>
+        </button>
+
+        <button
+          type="button"
+          class="view-button"
+          [class.active]="activeView === 'date'"
+          (click)="setView('date')"
+        >
+          <span class="view-icon">🗓️</span>
+          <strong>Until Selected Date</strong>
+          <small>चुनी गई तारीख तक</small>
+        </button>
+
+        <button
+          type="button"
+          class="view-button"
+          [class.active]="activeView === 'all'"
+          (click)="setView('all')"
+        >
+          <span class="view-icon">📋</span>
+          <strong>All Pending Bills</strong>
+          <small>सभी बाकी बिल</small>
+        </button>
+
+        <button
+          type="button"
+          class="view-button"
+          [class.active]="activeView === 'status'"
+          (click)="setView('status')"
+        >
+          <span class="view-icon">⚙️</span>
+          <strong>Filter by Status</strong>
+          <small>स्टेटस के अनुसार</small>
+        </button>
+      </div>
+
+      <!-- Date filter -->
+      @if (activeView === "date") {
+        <div class="filter-control">
+          <label for="deliveryDate">
+            किस तारीख तक के बिल दिखाएं?
+            <span>Show deliveries up to this date</span>
+          </label>
+
+          <input
+            id="deliveryDate"
+            type="date"
+            [(ngModel)]="selectedDate"
+            [min]="today"
+          />
+
+          <small>
+            पहले से देरी वाले सभी बिल भी दिखाई देंगे। Overdue bills are always
+            included.
+          </small>
+        </div>
+      }
+
+      <!-- Status filter -->
+      @if (activeView === "status") {
+        <div class="filter-control">
+          <label for="processStatus">
+            प्रोसेस स्टेटस चुनें
+            <span>Select Process Status</span>
+          </label>
+
+          <select id="processStatus" [(ngModel)]="selectedStatus">
+            <option value="">स्टेटस चुनें / Select Status</option>
+
+            @for (status of statusOptions; track status.value) {
+              <option [value]="status.value">
+                {{ status.label }}
+              </option>
+            }
+          </select>
+
+          <small> Delivered bills इस सूची में शामिल नहीं होंगे। </small>
+        </div>
+      }
+    </section>
+
+    <!-- Loading -->
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="loader"></div>
+        <strong>बिल लोड हो रहे हैं...</strong>
+        <small>Loading pending deliveries...</small>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (!isLoading && errorMessage) {
+      <div class="error-message">
+        <strong>!</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    <!-- Results -->
+    @if (!isLoading && !errorMessage) {
+      <section class="results-section">
+        <div class="results-heading">
+          <div>
+            @if (activeView === "today") {
+              <h2>Today's Deliveries</h2>
+              <p>आज जिन बिलों की डिलीवरी होनी है</p>
+            }
+
+            @if (activeView === "date") {
+              <h2>Deliveries Until Selected Date</h2>
+              <p>
+                {{ selectedDate ? formatDate(selectedDate) : "तारीख चुनें" }}
+                तक की डिलीवरी
+              </p>
+            }
+
+            @if (activeView === "all") {
+              <h2>All Pending Bills</h2>
+              <p>सभी बाकी और डिलीवर न हुए बिल</p>
+            }
+
+            @if (activeView === "status") {
+              <h2>Process Status Results</h2>
+              <p>चुने गए स्टेटस के सभी बिल</p>
+            }
+          </div>
+
+          <span class="result-count"> {{ visibleBills.length }} बिल </span>
+        </div>
+
+        <!-- Empty state -->
+        @if (visibleBills.length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">✓</span>
+
+            @if (activeView === "today") {
+              <h3>आज कोई डिलीवरी नहीं है</h3>
+              <p>No bills are expected today.</p>
+            } @else if (activeView === "status" && !selectedStatus) {
+              <h3>कृपया स्टेटस चुनें</h3>
+              <p>Select a process status to view bills.</p>
+            } @else {
+              <h3>कोई बिल नहीं मिला</h3>
+              <p>No matching pending bills found.</p>
+            }
+          </div>
+        }
+
+        <!-- Bill list -->
+        @for (bill of visibleBills; track bill.id) {
+          <article
+            class="bill-card"
+            [class.expanded]="expandedBillId === bill.id"
+          >
+            <!-- Clickable bill summary -->
+            <button
+              type="button"
+              class="bill-summary"
+              (click)="toggleBillDetails(bill.id)"
+              [attr.aria-expanded]="expandedBillId === bill.id"
+            >
+              <div class="bill-main">
+                <div class="bill-number-row">
+                  <span class="bill-number"> #{{ bill.billNumber }} </span>
+
+                  <span
+                    class="delivery-badge"
+                    [ngClass]="getDeliveryClass(bill)"
+                  >
+                    {{ getDeliveryLabel(bill) }}
+                  </span>
+                </div>
+
+                <strong class="customer-name">
+                  {{ bill.customer?.name || "ग्राहक का नाम उपलब्ध नहीं" }}
+                </strong>
+
+                <span class="customer-phone">
+                  {{ bill.customer?.phone || "मोबाइल उपलब्ध नहीं" }}
+                </span>
+              </div>
+
+              <div class="bill-side">
+                <span
+                  class="status-badge"
+                  [ngClass]="getStatusClass(bill.processStatus)"
+                >
+                  {{ getStatusLabel(bill.processStatus) }}
+                </span>
+
+                <span class="delivery-date">
+                  {{ formatDate(bill.expectedDeliveryDate) }}
+                </span>
+
+                <span class="expand-indicator">
+                  {{ expandedBillId === bill.id ? "▲" : "▼" }}
+                </span>
+              </div>
+            </button>
+
+            <!-- Expanded bill details -->
+            @if (expandedBillId === bill.id) {
+              <div class="bill-details">
+                <div class="detail-section">
+                  <h3>Customer Details / ग्राहक की जानकारी</h3>
+
+                  <div class="detail-row">
+                    <span>नाम / Name</span>
+                    <strong>{{ bill.customer?.name || "N/A" }}</strong>
+                  </div>
+
+                  <div class="detail-row">
+                    <span>मोबाइल / Mobile</span>
+                    <strong>{{ bill.customer?.phone || "N/A" }}</strong>
+                  </div>
+
+                  <div class="detail-row">
+                    <span>पता / Address</span>
+                    <strong>{{ bill.customer?.address || "N/A" }}</strong>
+                  </div>
+                </div>
+
+                <div class="date-details">
+                  <div>
+                    <span>बिल की तारीख</span>
+                    <strong>{{ formatDate(bill.billDate) }}</strong>
+                  </div>
+
+                  <div>
+                    <span>डिलीवरी की तारीख</span>
+                    <strong>
+                      {{ formatDate(bill.expectedDeliveryDate) }}
+                    </strong>
+                  </div>
+                </div>
+
+                <div class="detail-section">
+                  <h3>Items Details / कपड़ों की जानकारी</h3>
+
+                  @for (product of bill.products || []; track product.id) {
+                    <div class="product-row">
+                      <div class="product-name">
+                        <strong>{{ product.productType }}</strong>
+                        <small>{{ product.category }}</small>
+                      </div>
+
+                      <div>
+                        <span>मात्रा</span>
+                        <strong>{{ product.quantity }}</strong>
+                      </div>
+
+                      <div>
+                        <span>राशि</span>
+                        <strong>₹{{ product.amount }}</strong>
+                      </div>
+                    </div>
+                  }
+
+                  <div class="quantity-total">
+                    कुल कपड़े / Total Items
+                    <strong>{{ getTotalQuantity(bill) }}</strong>
+                  </div>
+                </div>
+
+                <div class="bill-total">
+                  <span>कुल राशि / Total Amount</span>
+                  <strong>₹{{ bill.totalAmount }}</strong>
+                </div>
+              </div>
+            }
+          </article>
+        }
+      </section>
+    }
+  </main>
+</div>

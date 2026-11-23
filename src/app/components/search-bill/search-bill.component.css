@@ -1,0 +1,869 @@
+/* =========================================================
+   GLOBAL STYLING / पूरी वेबसाइट की सामान्य स्टाइलिंग
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+.page-container {
+  min-height: 100vh;
+  background: #f4f6fa;
+  padding-bottom: 35px;
+}
+
+/* =========================================================
+   HEADER / पेज का शीर्ष भाग
+   ========================================================= */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  padding: 17px 15px;
+  border-bottom: 1px solid #e8eaf0;
+}
+
+.back-button {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #f1f3f8;
+  color: #202b46;
+  text-decoration: none;
+  font-size: 25px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #202b46;
+}
+
+.page-header p {
+  margin: 5px 0 0;
+  color: #7b8498;
+  font-size: 12px;
+}
+
+/* =========================================================
+   MAIN CONTENT / मुख्य सामग्री
+   ========================================================= */
+
+.content {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 18px 13px;
+}
+
+/* =========================================================
+   SEARCH CARD / बिल खोजने वाला कार्ड
+   ========================================================= */
+
+.search-card {
+  background: #ffffff;
+  padding: 19px 16px;
+  border-radius: 17px;
+  box-shadow: 0 4px 18px rgba(30, 45, 80, 0.05);
+}
+
+.search-card h2 {
+  margin: 0;
+  color: #202b46;
+  font-size: 17px;
+}
+
+.section-subtitle {
+  margin: 5px 0 18px;
+  color: #8991a2;
+  font-size: 12px;
+}
+
+/* =========================================================
+   SEARCH TABS / खोजने के विकल्प
+   ========================================================= */
+
+.search-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 5px;
+  background: #f1f3f8;
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+
+.search-tabs button {
+  min-height: 58px;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 5px;
+  background: transparent;
+  color: #69738a;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.search-tabs button span {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.search-tabs button.active {
+  background: #ffffff;
+  color: #3156c9;
+  box-shadow: 0 2px 7px rgba(30, 45, 80, 0.09);
+}
+
+/* =========================================================
+   FORM / इनपुट फील्ड
+   ========================================================= */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  color: #343e55;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-group label span {
+  display: block;
+  margin-top: 4px;
+  color: #8991a2;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.form-group input {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid #dce1eb;
+  border-radius: 11px;
+  padding: 0 14px;
+  outline: none;
+  font-size: 16px;
+  background: #ffffff;
+  color: #202b46;
+}
+
+.form-group input::placeholder {
+  color: #a3aaba;
+  font-size: 13px;
+}
+
+.form-group input:focus {
+  border-color: #4267dc;
+  box-shadow: 0 0 0 3px rgba(66, 103, 220, 0.1);
+}
+
+.form-group > small {
+  color: #8991a2;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   AUTOCOMPLETE / ग्राहक के सुझाव
+   ========================================================= */
+
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-loading,
+.no-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 13px;
+  background: #ffffff;
+  border: 1px solid #e2e6ef;
+  border-radius: 11px;
+  color: #69738a;
+  font-size: 12px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(30, 45, 80, 0.08);
+}
+
+.suggestions-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #dce1eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(30, 45, 80, 0.12);
+}
+
+.suggestion-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: #ffffff;
+  border: none;
+  border-bottom: 1px solid #edf0f5;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item:active {
+  background: #f0f4ff;
+}
+
+.suggestion-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.suggestion-details strong {
+  color: #25365f;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.suggestion-details span {
+  color: #7b8498;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.suggestion-arrow {
+  flex-shrink: 0;
+  color: #3156c9;
+  font-size: 25px;
+}
+
+.customer-search-error {
+  display: block;
+  color: #b42318 !important;
+  font-size: 11px;
+}
+
+/* =========================================================
+   SELECTED CUSTOMER / चुने गए ग्राहक की जानकारी
+   ========================================================= */
+
+.selected-customer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  margin-top: 2px;
+  background: #f0f7f2;
+  border: 1px solid #cde8d4;
+  border-radius: 11px;
+}
+
+.selected-customer-icon {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #218653;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.selected-customer-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selected-customer-details strong {
+  color: #225a39;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.selected-customer-details span {
+  color: #52765f;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.selected-customer-details small {
+  color: #218653;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.change-customer-button {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #3156c9;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 7px 3px;
+}
+
+/* =========================================================
+   SEARCH BUTTON / खोजने का बटन
+   ========================================================= */
+
+.search-button {
+  width: 100%;
+  min-height: 51px;
+  border: none;
+  border-radius: 11px;
+  background: #3156c9;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.search-button:hover {
+  background: #284bb5;
+}
+
+.search-button:active {
+  background: #2444a8;
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   MESSAGES / संदेश और त्रुटियां
+   ========================================================= */
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 11px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error-message {
+  color: #b42318;
+  background: #fff0ee;
+  border: 1px solid #ffd5d0;
+}
+
+.message-icon {
+  width: 23px;
+  height: 23px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #b42318;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* =========================================================
+   RESULTS / खोज के परिणाम
+   ========================================================= */
+
+.results-section {
+  margin-top: 25px;
+}
+
+.results-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.results-heading h2 {
+  margin: 0;
+  color: #202b46;
+  font-size: 18px;
+}
+
+.results-heading p {
+  margin: 5px 0 0;
+  color: #8991a2;
+  font-size: 11px;
+}
+
+.result-count {
+  background: #eaf0ff;
+  color: #3156c9;
+  padding: 8px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   BILL SECTION HEADINGS / बिल के सेक्शन का शीर्षक
+   ========================================================= */
+
+.bill-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0 13px;
+  padding: 13px 14px;
+  border-radius: 12px;
+}
+
+.active-heading {
+  background: #edf3ff;
+  border: 1px solid #dce6ff;
+}
+
+.delivered-heading {
+  background: #edf7f0;
+  border: 1px solid #d5eadb;
+  margin-top: 18px;
+}
+
+.section-heading-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.section-indicator {
+  width: 9px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #3156c9;
+}
+
+.delivered-heading .section-indicator {
+  background: #218653;
+}
+
+.section-heading-text h3 {
+  margin: 0;
+  color: #25365f;
+  font-size: 14px;
+}
+
+.section-heading-text p {
+  margin: 4px 0 0;
+  color: #7b8498;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.section-count {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #3156c9;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.delivered-heading .section-count {
+  color: #218653;
+}
+
+/* =========================================================
+   DELIVERED BILLS TOGGLE / डिलीवर बिल दिखाने का बटन
+   ========================================================= */
+
+.delivered-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 20px;
+  padding: 15px 14px;
+  border: 1px solid #dce8df;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #225a39;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.delivered-toggle:hover {
+  background: #f5faf6;
+  border-color: #b9d9c2;
+}
+
+.delivered-toggle.expanded {
+  background: #edf7f0;
+  border-color: #cde5d3;
+}
+
+.delivered-toggle-icon {
+  width: 35px;
+  height: 35px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #e3f2e7;
+  color: #218653;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.delivered-toggle-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.delivered-toggle-text strong {
+  color: #225a39;
+  font-size: 13px;
+}
+
+.delivered-toggle-text small {
+  color: #7b9180;
+  font-size: 10px;
+}
+
+.delivered-count {
+  min-width: 27px;
+  height: 27px;
+  padding: 0 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: #e3f2e7;
+  color: #218653;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.toggle-arrow {
+  flex-shrink: 0;
+  color: #218653;
+  font-size: 23px;
+  line-height: 1;
+}
+
+/* =========================================================
+   EMPTY ACTIVE BILLS / कोई सक्रिय बिल नहीं
+   ========================================================= */
+
+.empty-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 25px 15px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px dashed #dce1eb;
+  border-radius: 13px;
+}
+
+.empty-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: #e3f2e7;
+  color: #218653;
+  font-size: 18px;
+}
+
+.empty-section strong {
+  color: #34415d;
+  font-size: 13px;
+}
+
+.empty-section p {
+  margin: 5px 0 0;
+  color: #8991a2;
+  font-size: 11px;
+}
+
+/* =========================================================
+   BILL CARD / प्रत्येक बिल का कार्ड
+   ========================================================= */
+
+.bill-card {
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
+  border-radius: 15px;
+  padding: 16px;
+  margin-bottom: 13px;
+  box-shadow: 0 3px 12px rgba(30, 45, 80, 0.04);
+}
+
+.delivered-bill-card {
+  border-color: #e0eae2;
+}
+
+/* बिल नंबर और स्टेटस */
+
+.bill-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.small-label {
+  display: block;
+  color: #8790a3;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.bill-top h3 {
+  margin: 0;
+  color: #25365f;
+  font-size: 21px;
+  overflow-wrap: anywhere;
+}
+
+.status-badge {
+  max-width: 165px;
+  background: #eaf0ff;
+  color: #3156c9;
+  padding: 8px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.delivered-status {
+  background: #e3f2e7;
+  color: #218653;
+}
+
+/* =========================================================
+   CUSTOMER DETAILS / ग्राहक की जानकारी
+   ========================================================= */
+
+.customer-details {
+  padding: 16px 0;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.customer-details h4,
+.products-section h4 {
+  margin: 0 0 13px;
+  font-size: 14px;
+  color: #25304a;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.detail-row span {
+  color: #8790a3;
+  flex-shrink: 0;
+}
+
+.detail-row strong {
+  color: #343e55;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   BILL DATES / बिल की तारीखें
+   ========================================================= */
+
+.date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.date-grid strong {
+  display: block;
+  color: #343e55;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   PRODUCTS / कपड़ों की जानकारी
+   ========================================================= */
+
+.products-section {
+  padding: 16px 0;
+}
+
+.product-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e8eaf0;
+  font-size: 12px;
+}
+
+.product-info {
+  min-width: 0;
+}
+
+.product-info strong,
+.product-info span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.product-info strong {
+  color: #343e55;
+  font-size: 13px;
+}
+
+.product-info span {
+  color: #8790a3;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.product-quantity,
+.product-amount {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.product-quantity span,
+.product-amount span {
+  display: block;
+  color: #8790a3;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.product-quantity strong,
+.product-amount strong {
+  color: #343e55;
+  font-size: 12px;
+}
+
+/* =========================================================
+   TOTAL AMOUNT / कुल राशि
+   ========================================================= */
+
+.bill-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f4f6fc;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 5px;
+  color: #25304a;
+}
+
+.bill-total span {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bill-total small {
+  display: block;
+  margin-top: 4px;
+  color: #8790a3;
+  font-size: 10px;
+}
+
+.bill-total strong {
+  font-size: 20px;
+  color: #3156c9;
+}
+
+/* =========================================================
+   LARGER SCREENS / बड़ी स्क्रीन के लिए
+   ========================================================= */
+
+@media (min-width: 600px) {
+  .page-header {
+    padding: 20px 25px;
+  }
+
+  .content {
+    padding: 28px 20px;
+  }
+
+  .search-card {
+    padding: 25px;
+  }
+
+  .bill-card {
+    padding: 20px;
+  }
+}

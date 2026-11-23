@@ -1,0 +1,506 @@
+<div class="process-container">
+  <div class="page-header">
+    <header class="process-page-header">
+      <a routerLink="/home" class="back-button" aria-label="होम पेज पर जाएं">
+        ←
+      </a>
+
+      <div class="header-text">
+        <h2>Process Management</h2>
+        <p>Track clothes from workshop entry to final delivery</p>
+        <p>
+          कपड़ों की वर्कशॉप से लेकर ग्राहक को डिलीवरी तक की प्रक्रिया यहाँ
+          संभालें।
+        </p>
+      </div>
+    </header>
+  </div>
+
+  <!-- Main Process Options -->
+  <div *ngIf="currentPage === 'home'" class="option-list">
+    <button
+      class="option-card"
+      type="button"
+      (click)="openReceivedVerification()"
+    >
+      <div class="option-icon">📦</div>
+
+      <div class="option-content">
+        <h3>Send Clothes to Workshop</h3>
+        <p>Verify received clothes & generate QR labels</p>
+        <p>
+          प्राप्त कपड़ों की गिनती जाँचें और वर्कशॉप भेजने के लिए QR कोड बनाएँ।
+        </p>
+        <small>
+          First step: Check the clothes received against the bill, confirm
+          quantities and print QR labels.
+        </small>
+      </div>
+
+      <span class="arrow">›</span>
+    </button>
+
+    <button class="option-card" type="button" (click)="openExistingProcess()">
+      <div class="option-icon">🔄</div>
+
+      <div class="option-content">
+        <h3>Continue Existing Process</h3>
+        <p>Scan QR to find a bill and update its next stage</p>
+        <p>QR स्कैन करके बिल खोलें और अगली प्रक्रिया अपडेट करें।</p>
+        <small>
+          For clothes already sent to the workshop: scan their QR label, verify
+          quantities and move them to the next processing stage.
+        </small>
+      </div>
+
+      <span class="arrow">›</span>
+    </button>
+  </div>
+
+  <!-- Step 1: Send Clothes to Workshop -->
+  <div *ngIf="currentPage === 'received'" class="process-section">
+    <button type="button" class="back-button" (click)="goBack()">← Back</button>
+
+    <h3>Send Clothes to Workshop</h3>
+    <p>Verify the clothes before sending them for processing.</p>
+    <p class="section-subtitle">
+      वर्कशॉप भेजने से पहले प्राप्त कपड़ों की गिनती की जाँच करें।
+    </p>
+
+    <div class="search-section">
+      <label>Physical Bill Number / बिल नंबर</label>
+
+      <div class="search-row">
+        <input
+          type="text"
+          [(ngModel)]="billNumber"
+          placeholder="Enter physical bill number"
+          (keyup.enter)="searchBill()"
+        />
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="searchBill()"
+          [disabled]="loading"
+        >
+          {{ loading ? "Searching..." : "Find Bill" }}
+        </button>
+      </div>
+
+      <small class="input-help">
+        Enter the number printed on the customer's physical bill.
+        <br />
+        ग्राहक की पर्ची पर छपा हुआ बिल नंबर दर्ज करें।
+      </small>
+    </div>
+
+    <div *ngIf="errorMessage" class="message error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="message success-message">
+      {{ successMessage }}
+    </div>
+
+    <!-- Received Bill Details -->
+    <div *ngIf="bill" class="bill-card">
+      <div class="bill-heading">
+        <div>
+          <small>Bill Number</small>
+          <h3>{{ bill.billNumber }}</h3>
+        </div>
+
+        <span class="status-badge">
+          {{ bill.processStatus.replace("_", " ") }}
+        </span>
+      </div>
+
+      <div class="customer-details">
+        <p>
+          <strong>Customer:</strong>
+          {{ bill.customer?.name || "N/A" }}
+        </p>
+
+        <p>
+          <strong>Mobile:</strong>
+          {{ bill.customer?.phone || "N/A" }}
+        </p>
+      </div>
+
+      <!-- Quantity Verification -->
+      <div
+        class="verification-area"
+        *ngIf="bill.processStatus === 'RECEIVED' && !qrCodeDataUrl"
+      >
+        <div class="verification-heading">
+          <h4>Step 1: Verify Clothes Quantity</h4>
+          <p>
+            Match the clothes with the bill. Count each type of clothing and
+            enter the actual quantity received.
+            <br />
+            बिल के अनुसार प्रत्येक प्रकार के कपड़ों की गिनती करें और प्राप्त
+            वास्तविक संख्या दर्ज करें।
+          </p>
+        </div>
+
+        <div class="product-list">
+          <div class="product-row" *ngFor="let row of verificationRows">
+            <div class="product-info">
+              <strong>{{ row.productType }}</strong>
+              <small>{{ row.category }}</small>
+            </div>
+
+            <div class="quantity-info">
+              <small>Expected</small>
+              <strong>{{ row.expectedQuantity }}</strong>
+            </div>
+
+            <div class="quantity-input">
+              <label>Counted</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                [(ngModel)]="row.verifiedQuantity"
+                placeholder="Qty"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="confirm-button"
+          (click)="confirmVerification()"
+          [disabled]="confirming || !isVerificationValid()"
+        >
+          {{ confirming ? "Confirming..." : "Confirm & Send to Workshop" }}
+        </button>
+
+        <p class="verification-note">
+          After confirmation, the bill status will be updated and a unique QR
+          code will be generated for tracking.
+          <br />
+          पुष्टि के बाद बिल की स्थिति अपडेट होगी और कपड़ों की पहचान व आगे की
+          ट्रैकिंग के लिए QR कोड बनेगा।
+        </p>
+      </div>
+
+      <!-- QR Generation Loading -->
+      <div *ngIf="qrGenerating" class="qr-section">
+        <p>Generating QR Code...</p>
+        <p>QR कोड बनाया जा रहा है...</p>
+      </div>
+
+      <!-- Generated QR Code and Print Option -->
+      <div *ngIf="qrCodeDataUrl" class="qr-section">
+        <div class="qr-success-icon">✓</div>
+
+        <h3>QR Code Generated!</h3>
+        <p>बिल का QR कोड सफलतापूर्वक बन गया है।</p>
+
+        <p>
+          This QR code identifies this bill and its clothes batch. Scan it
+          whenever you need to continue processing this bill.
+          <br />
+          यह QR कोड इस बिल और कपड़ों के बैच की पहचान करेगा। आगे की प्रक्रिया के
+          लिए इसे स्कैन करें।
+        </p>
+
+        <div class="qr-label-preview">
+          <h4>DRY CLEAN MANAGEMENT</h4>
+
+          <img [src]="qrCodeDataUrl" alt="Bill QR Code" class="qr-image" />
+
+          <h3>Bill ID: {{ bill.id }}</h3>
+          <h3>Bill No: {{ bill.billNumber }}</h3>
+          <p>Customer: {{ bill.customer?.name || "N/A" }}</p>
+          <small>Scan to identify this clothes batch</small>
+        </div>
+
+        <button
+          type="button"
+          class="confirm-button print-button"
+          (click)="printQrLabels()"
+        >
+          🖨 Print 2 QR Labels
+          <br />
+          <small>दो QR लेबल प्रिंट करें</small>
+        </button>
+
+        <p class="verification-note">
+          Attach one QR label to the physical bill and the other to the
+          corresponding clothes batch.
+          <br />
+          एक QR लेबल बिल पर और दूसरा उसी बिल के कपड़ों के बैच पर लगाएँ।
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Continue Existing Process -->
+  <div *ngIf="currentPage === 'existing'" class="process-section">
+    <button type="button" class="back-button" (click)="goBack()">← Back</button>
+
+    <h3>Continue Existing Process</h3>
+    <p class="section-subtitle">
+      Scan the QR label to find a bill and continue its processing.
+      <br />
+      QR कोड स्कैन करके बिल खोलें और आगे की प्रक्रिया पूरी करें।
+    </p>
+
+    <!-- QR Scanner -->
+    <div class="scanner-option">
+      <h4>Step 1: Scan Clothes QR Code</h4>
+
+      <p>
+        Scan the QR label attached to the physical bill or clothes batch. This
+        will automatically find the bill using its unique Bill ID.
+      </p>
+
+      <p>
+        बिल या कपड़ों के बैच पर लगा QR कोड स्कैन करें। इससे बिल अपने आप खुल
+        जाएगा।
+      </p>
+
+      <button
+        type="button"
+        class="scan-button"
+        *ngIf="!scannerVisible"
+        (click)="startQrScanner()"
+        [disabled]="scannerStarting"
+      >
+        📷 Scan QR Code
+        <br />
+        <small>बिल का QR कोड स्कैन करें</small>
+      </button>
+
+      <div *ngIf="scannerVisible" class="scanner-container">
+        <p *ngIf="scannerStarting">
+          Starting camera... / कैमरा शुरू हो रहा है...
+        </p>
+
+        <div id="qr-reader"></div>
+
+        <div *ngIf="scannerError" class="message error-message">
+          {{ scannerError }}
+        </div>
+
+        <button
+          type="button"
+          class="cancel-scan-button"
+          (click)="closeQrScanner()"
+        >
+          Close Camera / कैमरा बंद करें
+        </button>
+      </div>
+    </div>
+
+    <!-- Manual Bill ID Search -->
+    <div class="search-section">
+      <h4>Or Find Bill Manually</h4>
+
+      <p>
+        Cannot scan the QR code? Enter the Bill ID printed below the QR code to
+        open the same bill.
+        <br />
+        QR स्कैन नहीं हो रहा है? QR लेबल पर छपी Bill ID दर्ज करके बिल खोलें।
+      </p>
+
+      <label>Bill ID / बिल आईडी</label>
+
+      <div class="search-row">
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [(ngModel)]="billId"
+          placeholder="Enter database Bill ID"
+          (keyup.enter)="searchExistingBill()"
+        />
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="searchExistingBill()"
+          [disabled]="loading"
+        >
+          {{ loading ? "Searching..." : "Find Bill" }}
+        </button>
+      </div>
+
+      <small class="input-help">
+        Use the database Bill ID printed on the QR label, not the physical bill
+        number.
+        <br />
+        QR लेबल पर छपी Bill ID दर्ज करें, ग्राहक की पर्ची वाला बिल नंबर नहीं।
+      </small>
+    </div>
+
+    <div *ngIf="errorMessage" class="message error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="message success-message">
+      {{ successMessage }}
+    </div>
+
+    <!-- Existing Bill Details -->
+    <div *ngIf="bill" class="bill-card">
+      <div class="bill-heading">
+        <div>
+          <small>Bill ID: {{ bill.id }}</small>
+          <h3>Bill No: {{ bill.billNumber }}</h3>
+        </div>
+
+        <span class="status-badge">
+          {{ bill.processStatus.replace("_", " ") }}
+        </span>
+      </div>
+
+      <div class="customer-details">
+        <p>
+          <strong>Customer:</strong>
+          {{ bill.customer?.name || "N/A" }}
+        </p>
+
+        <p>
+          <strong>Mobile:</strong>
+          {{ bill.customer?.phone || "N/A" }}
+        </p>
+      </div>
+
+      <!-- Delivered Bill Message -->
+      <div *ngIf="bill.processStatus === 'DELIVERED'" class="completed-message">
+        <span>✓</span>
+        <div>
+          <strong>Process Completed</strong>
+          <p>This bill has already been delivered to the customer.</p>
+          <small>यह बिल ग्राहक को दिया जा चुका है।</small>
+        </div>
+      </div>
+
+      <!-- Next Process Stage -->
+      <div class="verification-area" *ngIf="getNextProcessStatus()">
+        <div class="next-stage-card">
+          <small>Current Stage / वर्तमान स्थिति</small>
+          <strong>{{ bill.processStatus.replace("_", " ") }}</strong>
+
+          <span>↓</span>
+
+          <small>Next Stage / अगली प्रक्रिया</small>
+          <strong>{{ getNextProcessLabel() }}</strong>
+        </div>
+
+        <div class="verification-heading">
+          <h4>Step 2: Verify Clothes at This Stage</h4>
+
+          <p>
+            Count the clothes received back from the current processing stage.
+            Compare the actual quantities with the expected quantities.
+            <br />
+            मौजूदा प्रक्रिया से वापस आए कपड़ों की गिनती करें और अपेक्षित संख्या
+            से मिलान करें।
+          </p>
+        </div>
+
+        <div class="product-list">
+          <div class="product-row" *ngFor="let row of verificationRows">
+            <div class="product-info">
+              <strong>{{ row.productType }}</strong>
+              <small>{{ row.category }}</small>
+            </div>
+
+            <div class="quantity-info">
+              <small>Expected</small>
+              <strong>{{ row.expectedQuantity }}</strong>
+            </div>
+
+            <div class="quantity-input">
+              <label>Counted</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                [(ngModel)]="row.verifiedQuantity"
+                placeholder="Qty"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="confirm-button"
+          (click)="confirmExistingProcess()"
+          [disabled]="confirming || !isVerificationValid()"
+        >
+          {{ confirming ? "Updating..." : "Confirm & Move to Next Stage" }}
+        </button>
+
+        <p class="verification-note">
+          Once confirmed, the bill will move to the next processing stage. Scan
+          the same QR code again when the clothes return for the next stage.
+          <br />
+          पुष्टि के बाद बिल अगली प्रक्रिया में चला जाएगा। अगले चरण के लिए कपड़े
+          वापस आने पर यही QR कोड दोबारा स्कैन करें।
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Successful Process Update Popup -->
+  <div class="success-modal-overlay" *ngIf="successPopupVisible">
+    <div class="success-modal">
+      <div class="success-modal-icon">✓</div>
+
+      <h3>प्रक्रिया सफलतापूर्वक अपडेट हुई!</h3>
+      <p class="modal-subtitle">Process Status Updated Successfully!</p>
+
+      <div class="status-change-box">
+        <div class="status-item">
+          <small>पहले की स्थिति / Previous Status</small>
+          <strong>{{ getStatusHindi(popupPreviousStatus) }}</strong>
+          <span>{{ popupPreviousStatus.replace("_", " ") }}</span>
+        </div>
+
+        <div class="status-arrow">↓</div>
+
+        <div class="status-item new-status">
+          <small>नई स्थिति / New Status</small>
+          <strong>{{ getStatusHindi(popupNewStatus) }}</strong>
+          <span>{{ popupNewStatus.replace("_", " ") }}</span>
+        </div>
+      </div>
+
+      <p class="modal-message">
+        इस बिल की प्रक्रिया सफलतापूर्वक बदल दी गई है।
+        <br />
+        This bill has been moved to the next stage.
+      </p>
+
+      <button
+        *ngIf="qrCodeDataUrl"
+        type="button"
+        class="modal-print-button"
+        (click)="printQrLabels()"
+      >
+        🖨 2 QR लेबल प्रिंट करें
+        <small>Print 2 QR Labels</small>
+      </button>
+
+      <button
+        type="button"
+        class="modal-close-button"
+        (click)="closeStatusPopup()"
+      >
+        बंद करें / Close
+      </button>
+
+      <small class="modal-footer-note">
+        बंद करने पर अगली बिल की प्रक्रिया के लिए फॉर्म साफ हो जाएगा।
+      </small>
+    </div>
+  </div>
+</div>

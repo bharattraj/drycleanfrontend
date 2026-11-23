@@ -1,0 +1,448 @@
+<div class="page-container">
+  <!-- HEADER / शीर्षक -->
+  <header class="page-header">
+    <a routerLink="/" class="back-button" aria-label="होम पेज पर जाएं"> ← </a>
+
+    <div>
+      <h1>पुराना बिल खोजें</h1>
+      <p>Find Old Bill / पुराने बिल की जानकारी देखें</p>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- SEARCH SECTION / बिल खोजने का भाग -->
+    <section class="search-card">
+      <h2>बिल कैसे खोजना चाहते हैं?</h2>
+      <p class="section-subtitle">How would you like to search?</p>
+
+      <!-- SEARCH TABS / खोजने के विकल्प -->
+      <div class="search-tabs">
+        <button
+          type="button"
+          [class.active]="searchMode === 'bill'"
+          (click)="setSearchMode('bill')"
+        >
+          बिल नंबर
+          <span>Bill Number</span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="searchMode === 'phone'"
+          (click)="setSearchMode('phone')"
+        >
+          मोबाइल नंबर
+          <span>Mobile Number</span>
+        </button>
+      </div>
+
+      <!-- BILL NUMBER SEARCH -->
+      @if (searchMode === "bill") {
+        <div class="form-group">
+          <label for="billNumber">
+            फिजिकल बिल नंबर दर्ज करें
+            <span>Enter Physical Bill Number</span>
+          </label>
+
+          <input
+            id="billNumber"
+            type="text"
+            [(ngModel)]="billNumber"
+            (keyup.enter)="search()"
+            placeholder="जैसे: 014"
+            autocomplete="off"
+          />
+
+          <small>बिल पर लिखा हुआ नंबर दर्ज करें।</small>
+        </div>
+      }
+
+      <!-- PHONE NUMBER SEARCH -->
+      @if (searchMode === "phone") {
+        <div class="form-group">
+          <label for="phoneNumber">
+            ग्राहक का मोबाइल नंबर
+            <span>Customer Mobile Number</span>
+          </label>
+
+          <div class="autocomplete-container">
+            <input
+              id="phoneNumber"
+              type="tel"
+              inputmode="numeric"
+              maxlength="10"
+              [(ngModel)]="phoneNumber"
+              (input)="onPhoneInput()"
+              (keyup.enter)="search()"
+              placeholder="10 अंकों का मोबाइल नंबर"
+              autocomplete="off"
+            />
+
+            @if (isSearchingCustomers) {
+              <div class="autocomplete-loading">
+                ग्राहक खोज रहे हैं... / Searching customers...
+              </div>
+            }
+
+            @if (
+              showSuggestions &&
+              filteredCustomers.length > 0 &&
+              !selectedCustomer
+            ) {
+              <div class="suggestions-list">
+                @for (customer of filteredCustomers; track customer.id) {
+                  <button
+                    type="button"
+                    class="suggestion-item"
+                    (mousedown)="selectCustomer(customer)"
+                  >
+                    <div class="suggestion-details">
+                      <strong>{{ customer.name }}</strong>
+                      <span>मोबाइल: {{ customer.phone }}</span>
+                      <span>
+                        पता: {{ customer.address || "पता उपलब्ध नहीं" }}
+                      </span>
+                    </div>
+
+                    <span class="suggestion-arrow">›</span>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (
+              showSuggestions &&
+              filteredCustomers.length === 0 &&
+              !isSearchingCustomers &&
+              !customerSearchError &&
+              phoneNumber.length >= 3 &&
+              !selectedCustomer
+            ) {
+              <div class="no-suggestions">
+                कोई ग्राहक नहीं मिला / No customer found
+              </div>
+            }
+          </div>
+
+          @if (customerSearchError) {
+            <small class="customer-search-error">
+              {{ customerSearchError }}
+            </small>
+          }
+
+          @if (selectedCustomer) {
+            <div class="selected-customer">
+              <div class="selected-customer-icon">✓</div>
+
+              <div class="selected-customer-details">
+                <strong>{{ selectedCustomer.name }}</strong>
+                <span>{{ selectedCustomer.phone }}</span>
+                <span>
+                  {{ selectedCustomer.address || "पता उपलब्ध नहीं" }}
+                </span>
+                <small>ग्राहक चुना गया / Customer Selected</small>
+              </div>
+
+              <button
+                type="button"
+                class="change-customer-button"
+                (click)="onPhoneInput()"
+              >
+                बदलें / Change
+              </button>
+            </div>
+          }
+
+          <small>
+            ग्राहक चुनने पर केवल उसी ग्राहक के बिल दिखाई देंगे। बिना ग्राहक चुने
+            खोजने पर इस नंबर से जुड़े सभी बिल दिखाई देंगे।
+          </small>
+        </div>
+      }
+
+      <!-- SEARCH BUTTON -->
+      <button
+        type="button"
+        class="search-button"
+        [disabled]="isSearching"
+        (click)="search()"
+      >
+        @if (isSearching) {
+          खोज रहे हैं... / Searching...
+        } @else {
+          बिल खोजें / Search Bills
+        }
+      </button>
+    </section>
+
+    <!-- ERROR MESSAGE -->
+    @if (errorMessage) {
+      <div class="message error-message">
+        <span class="message-icon">!</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    <!-- SEARCH RESULTS -->
+    @if (hasSearched && bills.length > 0) {
+      <section class="results-section">
+        <!-- RESULTS SUMMARY -->
+        <div class="results-heading">
+          <div>
+            <h2>बिल खोज परिणाम</h2>
+            <p>Search Results / नवीनतम बिल सबसे ऊपर</p>
+          </div>
+
+          <span class="result-count"> {{ bills.length }} बिल मिले </span>
+        </div>
+
+        <!-- ACTIVE BILLS SECTION -->
+        @if (activeBills.length > 0) {
+          <div class="bill-section-heading active-heading">
+            <div class="section-heading-text">
+              <span class="section-indicator"></span>
+              <div>
+                <h3>Active Bills</h3>
+                <p>सक्रिय बिल / जिनकी डिलीवरी बाकी है</p>
+              </div>
+            </div>
+
+            <span class="section-count">
+              {{ activeBills.length }}
+            </span>
+          </div>
+
+          @for (bill of activeBills; track bill.id) {
+            <article class="bill-card">
+              <div class="bill-top">
+                <div>
+                  <span class="small-label">बिल नंबर / Bill Number</span>
+                  <h3>{{ bill.billNumber }}</h3>
+                </div>
+
+                <span class="status-badge">
+                  {{ getStatusLabel(bill.processStatus) }}
+                </span>
+              </div>
+
+              <div class="customer-details">
+                <h4>ग्राहक की जानकारी / Customer Details</h4>
+
+                <div class="detail-row">
+                  <span>नाम / Name</span>
+                  <strong>{{
+                    bill.customer?.name || "उपलब्ध नहीं / N/A"
+                  }}</strong>
+                </div>
+
+                <div class="detail-row">
+                  <span>मोबाइल / Mobile</span>
+                  <strong>{{
+                    bill.customer?.phone || "उपलब्ध नहीं / N/A"
+                  }}</strong>
+                </div>
+
+                <div class="detail-row">
+                  <span>पता / Address</span>
+                  <strong>{{
+                    bill.customer?.address || "उपलब्ध नहीं / N/A"
+                  }}</strong>
+                </div>
+              </div>
+
+              <div class="date-grid">
+                <div>
+                  <span class="small-label">बिल की तारीख / Bill Date</span>
+                  <strong>{{ bill.billDate }}</strong>
+                </div>
+
+                <div>
+                  <span class="small-label"
+                    >डिलीवरी की तारीख / Delivery Date</span
+                  >
+                  <strong>{{ bill.expectedDeliveryDate }}</strong>
+                </div>
+              </div>
+
+              <div class="products-section">
+                <h4>कपड़ों की जानकारी / Items Details</h4>
+
+                @for (product of bill.products; track product.id) {
+                  <div class="product-row">
+                    <div class="product-info">
+                      <strong>{{ product.productType }}</strong>
+                      <span>{{ product.category }}</span>
+                    </div>
+
+                    <div class="product-quantity">
+                      <span>मात्रा</span>
+                      <strong>{{ product.quantity }}</strong>
+                    </div>
+
+                    <div class="product-amount">
+                      <span>राशि</span>
+                      <strong>₹{{ product.amount }}</strong>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="bill-total">
+                <div>
+                  <span>कुल राशि</span>
+                  <small>Total Amount</small>
+                </div>
+                <strong>₹{{ bill.totalAmount }}</strong>
+              </div>
+            </article>
+          }
+        } @else {
+          <div class="empty-section">
+            <span class="empty-icon">✓</span>
+            <strong>कोई सक्रिय बिल नहीं है</strong>
+            <p>No active bills found for this search.</p>
+          </div>
+        }
+
+        <!-- DELIVERED BILLS TOGGLE -->
+        @if (deliveredBills.length > 0) {
+          <button
+            type="button"
+            class="delivered-toggle"
+            [class.expanded]="showDeliveredBills"
+            (click)="toggleDeliveredBills()"
+          >
+            <span class="delivered-toggle-icon">✓</span>
+
+            <span class="delivered-toggle-text">
+              <strong>
+                {{
+                  showDeliveredBills
+                    ? "डिलीवर बिल छिपाएं"
+                    : "डिलीवर हो चुके बिल देखें"
+                }}
+              </strong>
+              <small>
+                {{
+                  showDeliveredBills
+                    ? "Hide Delivered Bills"
+                    : "Show Delivered Bills"
+                }}
+              </small>
+            </span>
+
+            <span class="delivered-count">
+              {{ deliveredBills.length }}
+            </span>
+
+            <span class="toggle-arrow">
+              {{ showDeliveredBills ? "⌃" : "⌄" }}
+            </span>
+          </button>
+        }
+
+        <!-- DELIVERED BILLS SECTION -->
+        @if (showDeliveredBills && deliveredBills.length > 0) {
+          <div class="bill-section-heading delivered-heading">
+            <div class="section-heading-text">
+              <span class="section-indicator"></span>
+              <div>
+                <h3>Delivered Bills</h3>
+                <p>डिलीवर हो चुके बिल / ग्राहक को दिए गए बिल</p>
+              </div>
+            </div>
+
+            <span class="section-count">
+              {{ deliveredBills.length }}
+            </span>
+          </div>
+
+          @for (bill of deliveredBills; track bill.id) {
+            <article class="bill-card delivered-bill-card">
+              <div class="bill-top">
+                <div>
+                  <span class="small-label">बिल नंबर / Bill Number</span>
+                  <h3>{{ bill.billNumber }}</h3>
+                </div>
+
+                <span class="status-badge delivered-status">
+                  {{ getStatusLabel(bill.processStatus) }}
+                </span>
+              </div>
+
+              <div class="customer-details">
+                <h4>ग्राहक की जानकारी / Customer Details</h4>
+
+                <div class="detail-row">
+                  <span>नाम / Name</span>
+                  <strong>{{
+                    bill.customer?.name || "उपलब्ध नहीं / N/A"
+                  }}</strong>
+                </div>
+
+                <div class="detail-row">
+                  <span>मोबाइल / Mobile</span>
+                  <strong>{{
+                    bill.customer?.phone || "उपलब्ध नहीं / N/A"
+                  }}</strong>
+                </div>
+
+                <div class="detail-row">
+                  <span>पता / Address</span>
+                  <strong>{{
+                    bill.customer?.address || "उपलब्ध नहीं / N/A"
+                  }}</strong>
+                </div>
+              </div>
+
+              <div class="date-grid">
+                <div>
+                  <span class="small-label">बिल की तारीख / Bill Date</span>
+                  <strong>{{ bill.billDate }}</strong>
+                </div>
+
+                <div>
+                  <span class="small-label"
+                    >डिलीवरी की तारीख / Delivery Date</span
+                  >
+                  <strong>{{ bill.expectedDeliveryDate }}</strong>
+                </div>
+              </div>
+
+              <div class="products-section">
+                <h4>कपड़ों की जानकारी / Items Details</h4>
+
+                @for (product of bill.products; track product.id) {
+                  <div class="product-row">
+                    <div class="product-info">
+                      <strong>{{ product.productType }}</strong>
+                      <span>{{ product.category }}</span>
+                    </div>
+
+                    <div class="product-quantity">
+                      <span>मात्रा</span>
+                      <strong>{{ product.quantity }}</strong>
+                    </div>
+
+                    <div class="product-amount">
+                      <span>राशि</span>
+                      <strong>₹{{ product.amount }}</strong>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="bill-total">
+                <div>
+                  <span>कुल राशि</span>
+                  <small>Total Amount</small>
+                </div>
+                <strong>₹{{ bill.totalAmount }}</strong>
+              </div>
+            </article>
+          }
+        }
+      </section>
+    }
+  </main>
+</div>

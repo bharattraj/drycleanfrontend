@@ -1,0 +1,126 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.home-container {
+  min-height: 100vh;
+  background: #f4f6f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 45px 20px 25px;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.logo {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.header h1 {
+  font-size: 32px;
+  color: #20354d;
+  margin-bottom: 8px;
+}
+
+.hindi-title {
+  font-size: 19px;
+  color: #3975a8;
+  font-weight: bold;
+}
+
+.subtitle {
+  margin-top: 10px;
+  color: #777;
+  font-size: 14px;
+}
+
+.main-content {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.action-card {
+  width: 100%;
+  min-height: 175px;
+  border: none;
+  border-radius: 16px;
+  padding: 25px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.action-card:active {
+  transform: scale(0.97);
+}
+
+.new-bill {
+  background: #e2edf8;
+  color: #245b91;
+}
+
+.find-bill {
+  background: #e4f1e7;
+  color: #287342;
+}
+
+.card-icon {
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.card-hindi {
+  font-size: 19px;
+  font-weight: bold;
+  margin-top: 7px;
+}
+
+.card-description {
+  font-size: 13px;
+  margin-top: 8px;
+  color: #626262;
+}
+
+footer {
+  margin-top: auto;
+  padding-top: 35px;
+  color: #999;
+  font-size: 13px;
+}
+
+@media (max-width: 480px) {
+  .home-container {
+    padding-top: 65px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+  }
+
+  .main-content {
+    max-width: 100%;
+  }
+
+  .action-card {
+    min-height: 165px;
+  }
+}
